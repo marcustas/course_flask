@@ -13,7 +13,11 @@
 
 <body>
 
+
+
 <div class="container mt-4">
+    <button type="button" class="btn btn-primary" style="float:right" id="checkStatusButton">Status</button>
+    <div id="statusResult"></div>
     <h2>Animals in the Shelter</h2>
 
     <!-- Add animal form -->
@@ -33,26 +37,53 @@
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+
+                <div class="form-group">
+                    <label for="breed">Breed:</label>
+                    <input type="text" class="form-control" id="breed" placeholder="Animal breed" required>
+                </div>
+
+                <div class="form-group">
+                        <label for="photo">Photo:</label>
+                    <input type="text" class="form-control" id="photo" placeholder="Url photo" required>
+                </div>
+
+
+
+
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
         </div>
     </div>
 
-    <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
-    <table class="table table-striped">
+
+    <div class="input-group mb-2">
+    <div class="form-outline">
+        <input type="search" id="form1" class="form-control" placeholder="Search by Name" />
+    </div>
+    <button type="button" class="btn btn-primary" onclick="searchAnimal()">
+        Search
+    </button>
+    </div>
+
+
+</div>
+    <div class="container"> <table class="table table-striped">
         <thead>
             <tr>
                 <th>Animal Type</th>
                 <th>Name</th>
                 <th>Birth Date</th>
+                <th>Breed</th>
+                <th>Photo</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody id="animalsList">
             <!-- Rows will be populated by jQuery -->
         </tbody>
-    </table>
+    </table></div>
 </div>
 
 <!-- Edit animal modal -->
@@ -76,10 +107,22 @@
                 <label for="editAnimalName">Name:</label>
                 <input type="text" class="form-control" id="editAnimalName" required>
             </div>
+
             <div class="form-group">
                 <label for="editAnimalBirthDate">Birth Date:</label>
                 <input type="date" class="form-control" id="editAnimalBirthDate" required>
             </div>
+
+            <div class="form-group">
+                <label for="editAnimalBreed">Breed:</label>
+                <input type="text" class="form-control" id="editAnimalBreed" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editAnimalPhoto">Photo:</label>
+                <input type="text" class="form-control" id="editAnimalPhoto" required>
+            </div>
+
         </form>
       </div>
       <div class="modal-footer">
@@ -90,7 +133,19 @@
   </div>
 </div>
 
+
 <script>
+
+
+    $("#checkStatusButton").click(function () {
+        $.get("/health", function (data) {
+            $("#statusResult").text("Статус сервера: " + data);
+        }).fail(function () {
+            $("#statusResult").text("Ошибка при проверке статуса сервера.");
+        });
+    });
+
+
     // Update animal
     function updateAnimal(id) {
         // Fetch the current details of the animal to pre-populate the form.
@@ -99,6 +154,7 @@
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
+            $('#editAnimalBreed').val(data.animal.breed);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
             $('#editAnimalModal').modal('show');
         });
@@ -108,7 +164,9 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            birth_date: $('#editAnimalBirthDate').val(),
+            breed: $('#editAnimalBreed').val(),
+            photo: $('#editAnimalPhoto').val()
         };
 
         const animalId = $('#editAnimalId').val();
@@ -126,6 +184,7 @@
     }
 
 
+
     // Fetch all animals and display them
     function fetchAnimals() {
         $.getJSON('/animals', function(data) {
@@ -137,6 +196,9 @@
                         <td>${animal.animal_type}</td>
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.breed}</td>
+                        <td><img src="${animal.photo}" style="width: 100px;"></td>
+
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -153,7 +215,10 @@
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            birth_date: $('#birth_date').val(),
+            breed: $('#breed').val(),
+            photo: $('#photo').val()
+
         };
         $.ajax({
             url: '/animal',
@@ -178,6 +243,28 @@
                 }
             });
         }
+    }
+
+    function searchAnimal() {
+        const searchName = $('#form1').val();
+        $.getJSON(`/search?name=${searchName}`, function(data) {
+            $('#animalsList').empty();
+            data.animals.forEach(animal => {
+                $('#animalsList').append(`
+                    <tr>
+                        <td>${animal.animal_type}</td>
+                        <td>${animal.name}</td>
+                        <td>${animal.birth_date}</td>
+                        <td>${animal.breed}</td>
+                        <td><img src="${animal.photo}" style="width: 100px;"></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
     }
 
     // Initial fetch
