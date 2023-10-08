@@ -28,6 +28,7 @@ def index() -> Response:
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 
+
 @app.route('/animal', methods=['POST'])
 def add_animal() -> tuple[Response, int]:
     data = AnimalCreate(**request.get_json())
