@@ -13,7 +13,11 @@
 
 <body>
 
+
+
 <div class="container mt-4">
+    <button type="button" class="btn btn-primary" style="float:right" id="checkStatusButton">Status</button>
+    <div id="statusResult"></div>
     <h2>Animals in the Shelter</h2>
 
     <!-- Add animal form -->
@@ -40,6 +44,17 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
+
+    <div class="input-group mb-2">
+        <div class="form-outline">
+            <input type="search" id="form1" class="form-control" />
+    </div>
+    <button type="button" class="btn btn-primary">
+        search
+    </button>
+
+
+</div>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -90,7 +105,28 @@
   </div>
 </div>
 
+
 <script>
+    function search() {
+        $.ajax({
+            url: `/health`,
+            type: 'GET',
+            success: function() {
+                fetchAnimals();
+            }
+        });
+    }
+
+
+    $("#checkStatusButton").click(function () {
+        $.get("/health", function (data) {
+            $("#statusResult").text("Статус сервера: " + data);
+        }).fail(function () {
+            $("#statusResult").text("Ошибка при проверке статуса сервера.");
+        });
+    });
+
+
     // Update animal
     function updateAnimal(id) {
         // Fetch the current details of the animal to pre-populate the form.
@@ -124,6 +160,7 @@
             }
         });
     }
+
 
 
     // Fetch all animals and display them
