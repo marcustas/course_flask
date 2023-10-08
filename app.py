@@ -17,6 +17,11 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health', methods=['GET'])  # Додали ендпоінт /health
+def health_check():
+    return 'OK', 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
     animals = Animal.query.all()
