@@ -107,15 +107,6 @@
 
 
 <script>
-    function search() {
-        $.ajax({
-            url: `/health`,
-            type: 'GET',
-            success: function() {
-                fetchAnimals();
-            }
-        });
-    }
 
 
     $("#checkStatusButton").click(function () {
