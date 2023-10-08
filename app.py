@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, Response, render_template
 
 from models.pydantic.models import AnimalCreate, AnimalResponse
-from typing import Union
+from typing import Union, Tuple, Dict, Any
 from settings import settings
 from database import init_db
 from models.sqlalchemy.models import Animal
@@ -17,10 +17,27 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health', methods=['GET'])
+def health_check() -> tuple[str, int]:
+    return 'OK', 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
-    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+    name = request.args.get('name')
+    if name:
+        animals = Animal.query.filter_by(name=name).all()
+    else:
+        animals = Animal.query.all()
+    response = {'animals': []}
+    for animal in animals:
+        model = AnimalResponse.model_validate(animal)
+        age = model.calculate_age()
+        data = model.model_dump(mode='json')
+        data['age'] = age
+        response['animals'].append(data)
+    json_response = jsonify(response)
+    return json_response
 
 
 @app.route('/animal', methods=['POST'])
@@ -28,7 +45,9 @@ def add_animal() -> tuple[Response, int]:
     data = AnimalCreate(**request.get_json())
     new_animal = Animal(
         animal_type=data.animal_type,
+        animal_breed=data.animal_breed,
         name=data.name,
+        photo_url=data.photo_url,
         birth_date=data.birth_date
     )
     db.session.add(new_animal)
@@ -51,6 +70,8 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.animal_breed = data.animal_breed
+    animal.photo_url = data.photo_url
     db.session.commit()
     return jsonify(
         {
