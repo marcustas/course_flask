@@ -23,15 +23,28 @@
             <form id="addAnimalForm">
                 <div class="form-group">
                     <label for="animal_type">Animal Type:</label>
-                    <input type="text" class="form-control" id="animal_type" placeholder="Animal Type" required>
+                    <select id="animal_type" name="animal_type">
+                        <option value="" selected disabled hidden>Choose an Animal Type</option>
+                        <option value="cat">Cat</option>
+                        <option value="dog">Dog</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="animal_breed">Animal Breed:</label>
+                    <select id="animal_breed" name="animal_breed" class="form-control" required>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="name">Animal Name:</label>
                     <input type="text" class="form-control" id="name" placeholder="Animal Name" required>
                 </div>
                 <div class="form-group">
+                    <label for="photo_url">Animal Photo:</label>
+                    <input type="text" class="form-control" id="photo_url" placeholder="Animal Photo" required>
+                </div>
+                <div class="form-group">
                     <label for="birth_date">Birth Date:</label>
-                    <input type="date" class="form-control" id="birth_date" required>
+                    <input type="date" class="form-control" id="birth_date" max="{{ today }}" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
@@ -40,14 +53,22 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
+    <div class="form-group">
+        <label for="search_by_name">Search Animal By Name:</label>
+        <input type="text" class="form-control" id="search_by_name" placeholder="Search By Name">
+    </div>
+    <button type="button" class="btn btn-primary" onclick="findAnimals()">Search</button>
+    <button type="button" class="btn btn-secondary" onclick="fetchAnimals()">Go back to All Animals</button>
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Animal Type</th>
-                <th>Name</th>
-                <th>Birth Date</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>Animal Type</th>
+            <th>Animal Breed</th>
+            <th>Name</th>
+            <th>Photo</th>
+            <th>Birth Date</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody id="animalsList">
             <!-- Rows will be populated by jQuery -->
@@ -57,37 +78,45 @@
 
 <!-- Edit animal modal -->
 <div class="modal" tabindex="-1" role="dialog" id="editAnimalModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Animal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="editAnimalForm">
-            <input type="hidden" id="editAnimalId">
-            <div class="form-group">
-                <label for="editAnimalType">Animal Type:</label>
-                <input type="text" class="form-control" id="editAnimalType" required>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Animal</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="form-group">
-                <label for="editAnimalName">Name:</label>
-                <input type="text" class="form-control" id="editAnimalName" required>
+            <div class="modal-body">
+                <form id="editAnimalForm">
+                    <input type="hidden" id="editAnimalId">
+                    <div class="form-group">
+                        <label for="editAnimalType">Animal Type:</label>
+                        <input type="text" class="form-control" id="editAnimalType" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalBreed">Animal Breed:</label>
+                        <input type="text" class="form-control" id="editAnimalBreed" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalName">Name:</label>
+                        <input type="text" class="form-control" id="editAnimalName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalPhoto">Photo:</label>
+                        <input type="text" class="form-control" id="editAnimalPhoto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalBirthDate">Birth Date:</label>
+                        <input type="date" class="form-control" id="editAnimalBirthDate" required>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="editAnimalBirthDate">Birth Date:</label>
-                <input type="date" class="form-control" id="editAnimalBirthDate" required>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="submitEditAnimal()">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitEditAnimal()">Save changes</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
@@ -98,7 +127,9 @@
         $.getJSON(`/animal/${id}`, function(data) {
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
+            $('#editAnimalBreed').val(data.animal.animal_breed);
             $('#editAnimalName').val(data.animal.name);
+            $('#editAnimalPhoto').val(data.animal.photo_url);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
             $('#editAnimalModal').modal('show');
         });
@@ -107,7 +138,9 @@
     function submitEditAnimal() {
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
+            animal_breed: $('#editAnimalBreed').val(),
             name: $('#editAnimalName').val(),
+            photo_url: $('#editAnimalPhoto').val(),
             birth_date: $('#editAnimalBirthDate').val()
         };
 
@@ -135,8 +168,11 @@
                 $('#animalsList').append(`
                     <tr>
                         <td>${animal.animal_type}</td>
+                        <td>${animal.animal_breed}</td>
                         <td>${animal.name}</td>
+                        <td>${animal.photo_url}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.age}</td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -147,20 +183,54 @@
         });
     }
 
+    // Find animals by their name
+    function findAnimals() {
+        const name = $('#search_by_name').val();
+
+        if (name) {
+            $.getJSON('/animals', {name: name}, function (data) {
+                $('#animalsList').empty();
+                data["animals"].forEach(animal => {
+                    $('#animalsList').append(`
+                        <tr>
+                            <td>${animal.animal_type}</td>
+                            <td>${animal.animal_breed}</td>
+                            <td>${animal.name}</td>
+                            <td>${animal.photo_url}</td>
+                            <td>${animal.birth_date}</td>
+                            <td>${animal.age}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm"
+                                            onclick="updateAnimal(${animal.id})">Update</button>
+                                <button class="btn btn-danger btn-sm"
+                                            onclick="deleteAnimal(${animal.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        } else {
+            fetchAnimals();
+        }
+    }
+
     // Add new animal
-    $('#addAnimalForm').on('submit', function(e) {
+    $('#addAnimalForm').on('submit', function (e) {
         e.preventDefault();
         const newAnimal = {
             animal_type: $('#animal_type').val(),
+            animal_breed: $('#animal_breed').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            photo_url: $('#photo_url').val(),
+            birth_date: $('#birth_date').val(),
+            age: $('#age').val()
         };
         $.ajax({
             url: '/animal',
             type: 'POST',
             data: JSON.stringify(newAnimal),
             contentType: 'application/json',
-            success: function() {
+            success: function () {
                 fetchAnimals();
                 $('#addAnimalForm')[0].reset();
             }
@@ -173,7 +243,7 @@
             $.ajax({
                 url: `/animal/${id}`,
                 type: 'DELETE',
-                success: function() {
+                success: function () {
                     fetchAnimals();
                 }
             });
@@ -183,6 +253,37 @@
     // Initial fetch
     fetchAnimals();
 
+    document.getElementById('animal_type').addEventListener('change', function () {
+        const breedSelect = document.getElementById('animal_breed');
+        breedSelect.innerHTML = '';
+
+        const selectedType = this.value;
+
+        if (selectedType === 'cat') {
+            const catBreeds = ['Ragdoll', 'Sphynx cat', 'Bengal cat', 'Maine Coon',
+                'American Shorthair', 'Siamese cat', 'Persian cat', 'Scottish Fold'];
+            catBreeds.forEach(function (breed) {
+                const option = document.createElement('option');
+                option.value = breed;
+                option.text = breed;
+                breedSelect.add(option);
+            });
+        } else if (selectedType === 'dog') {
+            const dogBreeds = ['Labrador Retriever', 'Bulldog', 'Poodle', 'Golden Retriever', 'German Shepherd',
+                'French Bulld', 'Pug', 'Beagle', 'Chihuahua', 'Pomeranian', 'Yorkshire Terrier'];
+            dogBreeds.forEach(function (breed) {
+                const option = document.createElement('option');
+                option.value = breed;
+                option.text = breed;
+                breedSelect.add(option);
+            });
+        }
+    });
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+        $('#birth_date').attr('max', today);
+    });
 
 </script>
 </body>
