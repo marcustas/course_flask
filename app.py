@@ -21,15 +21,11 @@ def home() -> str:
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
     name = request.args.get('name')
-    animals = Animal.query.filter_by(name=name).all() if name else Animal.query.all()
+    animals = Animal.query.filter(Animal.columnName.contains(name))
     response = {'animals': []}
 
     for animal in animals:
-        model = AnimalResponse.model_validate(animal)
-        age = model.calculate_age()
-        data = model.model_dump(mode='json')
-        data['age'] = age
-        response['animals'].append(data)
+        response['animals'].append(AnimalResponse.model_validate(animal).dict())
 
     return jsonify(response)
 
@@ -54,7 +50,7 @@ def add_animal() -> tuple[Response, int]:
 
 
 @app.route('/animal/<int:pk>', methods=['PUT'])
-def update_animal(pk: int) -> Response:
+def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     data = AnimalCreate(**request.get_json())
     animal = Animal.query.get(pk)
 
@@ -103,7 +99,7 @@ def delete_animal(pk: int) -> Union[Response, tuple[Response, int]]:
 
 
 @app.route('/health', methods=['GET'])
-def health() -> Union[Response, tuple[Response, int]]:
+def health() -> tuple[Response, int]:
     return jsonify({"message": "OK"}), 200
 
 
