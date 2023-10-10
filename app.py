@@ -1,10 +1,11 @@
+from typing import Union
+
 from flask import Flask, jsonify, request, Response, render_template
 
-from models.pydantic.models import AnimalCreate, AnimalResponse
-from typing import Union
-from settings import settings
 from database import init_db
+from models.pydantic.models import AnimalCreate, AnimalResponse
 from models.sqlalchemy.models import Animal
+from settings import settings
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.sqlalchemy_database_uri
@@ -19,17 +20,24 @@ def home() -> str:
 
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
-    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+    name = request.args.get('name')
+    animals = Animal.query.filter(Animal.columnName.contains(name))
+    response = {'animals': []}
 
+    for animal in animals:
+        response['animals'].append(AnimalResponse.model_validate(animal).dict())
+
+    return jsonify(response)
 
 @app.route('/animal', methods=['POST'])
 def add_animal() -> tuple[Response, int]:
     data = AnimalCreate(**request.get_json())
     new_animal = Animal(
         animal_type=data.animal_type,
+        animal_breed=data.animal_breed,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        photo_url=data.photo_url
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -45,13 +53,17 @@ def add_animal() -> tuple[Response, int]:
 def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     data = AnimalCreate(**request.get_json())
     animal = Animal.query.get(pk)
+
     if not animal:
         return jsonify({"message": "Animal not found"}), 404
 
     animal.animal_type = data.animal_type
+    animal.animal_breed = data.animal_breed
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.photo_url = data.photo_url
     db.session.commit()
+
     return jsonify(
         {
             "message": "Animal updated successfully!",
@@ -76,12 +88,19 @@ def retrieve_animal(pk: int) -> Union[Response, tuple[Response, int]]:
 @app.route('/animal/<int:pk>', methods=['DELETE'])
 def delete_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal = Animal.query.get(pk)
+
     if not animal:
         return jsonify({"message": "Animal not found"}), 404
 
     db.session.delete(animal)
     db.session.commit()
+
     return jsonify({"message": "Animal deleted successfully!"})
+
+
+@app.route('/health', methods=['GET'])
+def health() -> tuple[Response, int]:
+    return jsonify({"message": "OK"}), 200
 
 
 def initialize_app():
