@@ -125,7 +125,7 @@
     function updateAnimal(id) {
         // Fetch the current details of the animal to pre-populate the form.
         // This assumes you have a backend route to get details of a single animal.
-        $.getJSON(`/animal/${id}`, function (data) {
+        $.getJSON(`/animal/${id}`, function(data) {
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalBreed').val(data.animal.animal_breed);
