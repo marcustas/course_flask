@@ -17,10 +17,29 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health() -> Response:
+    return jsonify({'message': 'OK'}), 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
-    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+    search_value = request.args.get('search')
+
+    if search_value:
+        animals = Animal.query.filter_by(name=search_value).all()
+    else:
+        animals = Animal.query.all()
+
+    response = {'animals': []}
+    for animal in animals:
+        model = AnimalResponse.model_validate(animal)
+        age = model.get_age()
+        data = model.model_dump(mode='json')
+        data['age'] = age
+        response['animals'].append(data)
+    json_response = jsonify(response)
+    return json_response
 
 
 @app.route('/animal', methods=['POST'])
@@ -29,7 +48,9 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        animal_breed=data.animal_breed,
+        image_url=data.image_url
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -51,6 +72,8 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.animal_breed = data.animal_breed
+    animal.image_url = data.image_url
     db.session.commit()
     return jsonify(
         {
