@@ -27,14 +27,14 @@ def index() -> Response:
     search_value = request.args.get('search')
 
     if search_value:
-        animals = Animal.query.filter_by(name=search_value).all()
+        animals = Animal.query.filter(Animal.name.contains(search_value))
     else:
         animals = Animal.query.all()
 
     response = {'animals': []}
     for animal in animals:
         model = AnimalResponse.model_validate(animal)
-        age = model.get_age()
+        age = model.age
         data = model.model_dump(mode='json')
         data['age'] = age
         response['animals'].append(data)

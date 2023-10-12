@@ -19,8 +19,8 @@
     <!-- Add animal form -->
     <div class="card mt-4 ">
         <div class="card-header">Add a New Animal</div>
-        <div class="card-body" >
-            <form id="addAnimalForm" >
+        <div class="card-body">
+            <form id="addAnimalForm">
                 <div class="form-group">
                     <label for="animal_type">Animal Type:</label>
                     <input type="text" class="form-control" id="animal_type" placeholder="Animal Type" required>
@@ -48,12 +48,12 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
-    <form id="searchForm" class="mb-4" >
-         <div class="form-group">
-             <label for="search">Search</label>
-             <input type="text" class="form-control" id="search" placeholder="search" required>
-         </div>
-         <button type="submit" class="btn btn-primary">Search</button>
+    <form id="searchForm" class="mb-4">
+        <div class="form-group">
+            <label for="search">Search</label>
+            <input type="text" class="form-control" id="search" placeholder="search" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
     </form>
     <table class="table table-striped">
         <thead>
@@ -99,13 +99,14 @@
                         <input type="date" class="form-control" id="editAnimalBirthDate" required>
                     </div>
                     <div class="form-group">
-                    <label for="editAnimalBreed">Animal breed:</label>
-                    <input type="text" class="form-control" id="editAnimalBreed" placeholder="Animal breed" required>
-                </div>
-                <div class="form-group">
-                    <label for="editImageUrl">Image URL:</label>
-                    <input type="text" class="form-control" id="editImageUrl" placeholder="Image URL" required>
-                </div>
+                        <label for="editAnimalBreed">Animal breed:</label>
+                        <input type="text" class="form-control" id="editAnimalBreed" placeholder="Animal breed"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editImageUrl">Image URL:</label>
+                        <input type="text" class="form-control" id="editImageUrl" placeholder="Image URL" required>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -158,8 +159,8 @@
 
     // Fetch all animals and display them
     function fetchAnimals() {
-        const  search= $('#search').val()
-        $.getJSON('/animals',{search}, function (data) {
+        const search = $('#search').val()
+        $.getJSON('/animals', {search}, function (data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
                 $('#animalsList').append(`
@@ -202,7 +203,7 @@
         });
     });
 
-     // Search
+    // Search
     $('#searchForm').on('submit', function (e) {
         e.preventDefault();
         fetchAnimals()

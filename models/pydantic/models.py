@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict,computed_field
 
 
 class AnimalCreate(BaseModel):
@@ -20,7 +20,9 @@ class AnimalResponse(BaseModel):
     animal_breed: str
     image_url: str
 
-    def get_age(self) -> str:
+    @computed_field
+    @property
+    def age(self) -> str:
         today = date.today()
         years = today.year - self.birth_date.year
         months = today.month - self.birth_date.month
