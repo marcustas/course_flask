@@ -31,15 +31,7 @@ def index() -> Response:
     else:
         animals = Animal.query.all()
 
-    response = {'animals': []}
-    for animal in animals:
-        model = AnimalResponse.model_validate(animal)
-        age = model.age
-        data = model.model_dump(mode='json')
-        data['age'] = age
-        response['animals'].append(data)
-    json_response = jsonify(response)
-    return json_response
+    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 
 @app.route('/animal', methods=['POST'])
