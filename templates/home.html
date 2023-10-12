@@ -17,10 +17,10 @@
     <h2>Animals in the Shelter</h2>
 
     <!-- Add animal form -->
-    <div class="card mt-4">
+    <div class="card mt-4 ">
         <div class="card-header">Add a New Animal</div>
-        <div class="card-body">
-            <form id="addAnimalForm">
+        <div class="card-body" >
+            <form id="addAnimalForm" >
                 <div class="form-group">
                     <label for="animal_type">Animal Type:</label>
                     <input type="text" class="form-control" id="animal_type" placeholder="Animal Type" required>
@@ -33,6 +33,14 @@
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+                <div class="form-group">
+                    <label for="animal_breed">Animal breed:</label>
+                    <input type="text" class="form-control" id="animal_breed" placeholder="Animal breed" required>
+                </div>
+                <div class="form-group">
+                    <label for="image_url">Image URL:</label>
+                    <input type="text" class="form-control" id="image_url" placeholder="Image URL" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
         </div>
@@ -40,54 +48,72 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
+    <form id="searchForm" class="mb-4" >
+         <div class="form-group">
+             <label for="search">Search</label>
+             <input type="text" class="form-control" id="search" placeholder="search" required>
+         </div>
+         <button type="submit" class="btn btn-primary">Search</button>
+    </form>
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Animal Type</th>
-                <th>Name</th>
-                <th>Birth Date</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>Animal Type</th>
+            <th>Name</th>
+            <th>Birth Date</th>
+            <th>Age</th>
+            <th>Animal Breed</th>
+            <th>Image URL</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody id="animalsList">
-            <!-- Rows will be populated by jQuery -->
+        <!-- Rows will be populated by jQuery -->
         </tbody>
     </table>
 </div>
 
 <!-- Edit animal modal -->
 <div class="modal" tabindex="-1" role="dialog" id="editAnimalModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Animal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="editAnimalForm">
-            <input type="hidden" id="editAnimalId">
-            <div class="form-group">
-                <label for="editAnimalType">Animal Type:</label>
-                <input type="text" class="form-control" id="editAnimalType" required>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Animal</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="form-group">
-                <label for="editAnimalName">Name:</label>
-                <input type="text" class="form-control" id="editAnimalName" required>
+            <div class="modal-body">
+                <form id="editAnimalForm">
+                    <input type="hidden" id="editAnimalId">
+                    <div class="form-group">
+                        <label for="editAnimalType">Animal Type:</label>
+                        <input type="text" class="form-control" id="editAnimalType" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalName">Name:</label>
+                        <input type="text" class="form-control" id="editAnimalName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAnimalBirthDate">Birth Date:</label>
+                        <input type="date" class="form-control" id="editAnimalBirthDate" required>
+                    </div>
+                    <div class="form-group">
+                    <label for="editAnimalBreed">Animal breed:</label>
+                    <input type="text" class="form-control" id="editAnimalBreed" placeholder="Animal breed" required>
+                </div>
+                <div class="form-group">
+                    <label for="editImageUrl">Image URL:</label>
+                    <input type="text" class="form-control" id="editImageUrl" placeholder="Image URL" required>
+                </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="editAnimalBirthDate">Birth Date:</label>
-                <input type="date" class="form-control" id="editAnimalBirthDate" required>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="submitEditAnimal()">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitEditAnimal()">Save changes</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
@@ -95,11 +121,13 @@
     function updateAnimal(id) {
         // Fetch the current details of the animal to pre-populate the form.
         // This assumes you have a backend route to get details of a single animal.
-        $.getJSON(`/animal/${id}`, function(data) {
+        $.getJSON(`/animal/${id}`, function (data) {
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
+            $('#editAnimalBreed').val(data.animal.animal_breed);
+            $('#editImageUrl').val(data.animal.image_url);
             $('#editAnimalModal').modal('show');
         });
     }
@@ -108,7 +136,9 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            birth_date: $('#editAnimalBirthDate').val(),
+            animal_breed: $('#editAnimalBreed').val(),
+            image_url: $('#editImageUrl').val(),
         };
 
         const animalId = $('#editAnimalId').val();
@@ -118,7 +148,7 @@
             type: 'PUT',
             data: JSON.stringify(updatedAnimal),
             contentType: 'application/json',
-            success: function() {
+            success: function () {
                 $('#editAnimalModal').modal('hide');
                 fetchAnimals();
             }
@@ -128,15 +158,18 @@
 
     // Fetch all animals and display them
     function fetchAnimals() {
-        $.getJSON('/animals', function(data) {
+        const  search= $('#search').val()
+        $.getJSON('/animals',{search}, function (data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
-                console.log(animal)
                 $('#animalsList').append(`
                     <tr>
                         <td>${animal.animal_type}</td>
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.age}</td>
+                        <td>${animal.animal_breed}</td>
+                        <td><img src=${animal.image_url} class="img-fluid" alt="image" width="100" height="50"> </td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -148,23 +181,31 @@
     }
 
     // Add new animal
-    $('#addAnimalForm').on('submit', function(e) {
+    $('#addAnimalForm').on('submit', function (e) {
         e.preventDefault();
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            birth_date: $('#birth_date').val(),
+            animal_breed: $('#animal_breed').val(),
+            image_url: $('#image_url').val(),
         };
         $.ajax({
             url: '/animal',
             type: 'POST',
             data: JSON.stringify(newAnimal),
             contentType: 'application/json',
-            success: function() {
+            success: function () {
                 fetchAnimals();
                 $('#addAnimalForm')[0].reset();
             }
         });
+    });
+
+     // Search
+    $('#searchForm').on('submit', function (e) {
+        e.preventDefault();
+        fetchAnimals()
     });
 
     // Delete animal
@@ -173,7 +214,7 @@
             $.ajax({
                 url: `/animal/${id}`,
                 type: 'DELETE',
-                success: function() {
+                success: function () {
                     fetchAnimals();
                 }
             });
