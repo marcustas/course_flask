@@ -161,7 +161,7 @@
 
     // Fetch all animals and display them
     function fetchAnimals() {
-        $.getJSON('/animals', function (data) {
+        $.getJSON('/animals', function(data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
                 console.log(animal)
