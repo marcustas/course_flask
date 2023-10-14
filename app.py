@@ -22,6 +22,11 @@ def index() -> Response:
     animals = Animal.query.all()
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
+@app.route('/health', methods=['POST'])
+def index() -> tuple[Response, int]:
+    animals = Animal.query.all()
+    return jsonify({"message": 'Status 200'}), 200
+
 
 @app.route('/animal', methods=['POST'])
 def add_animal() -> tuple[Response, int]:
@@ -29,7 +34,9 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        animal_breed=data.animal_breed,
+        photo=data.photo
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -51,6 +58,8 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal_breed = data.animal_breed
+    photo = data.photo
     db.session.commit()
     return jsonify(
         {
