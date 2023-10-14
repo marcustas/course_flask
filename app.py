@@ -23,8 +23,7 @@ def index() -> Response:
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 @app.route('/health', methods=['POST'])
-def index() -> tuple[Response, int]:
-    animals = Animal.query.all()
+def health() -> tuple[Response, int]:
     return jsonify({"message": 'Status 200'}), 200
 
 
