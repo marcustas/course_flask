@@ -48,6 +48,17 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
+    <form id="Filter" class="mb-4">
+         <div class="mb-3">
+            <label for="FilterInput" class="form-label">Filter by Name</label>
+            <input class="form-control" id="FilterInput" rows="1">
+         </div>
+        <div align="right">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+        <br>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -150,7 +161,7 @@
 
     // Fetch all animals and display them
     function fetchAnimals() {
-        $.getJSON('/animals', function(data) {
+        $.getJSON('/animals', function (data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
                 console.log(animal)
@@ -160,7 +171,30 @@
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
                         <td>${animal.animal_breed}</td>
-                        <td><img src = '${animal.photo}', width="80", height="60"></td>
+                        <td><img src = '${animal.photo}' width="80" height="60"></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
+    }
+
+    function searchAnimals() {
+        let FilterInput = $('#FilterInput').val()
+        $.getJSON('/search', {FilterInput}, function (data) {
+            $('#animalsList').empty();
+            data.animals.forEach(animal => {
+                console.log(animal)
+                $('#animalsList').append(`
+                    <tr>
+                        <td>${animal.animal_type}</td>
+                        <td>${animal.name}</td>
+                        <td>${animal.birth_date}</td>
+                        <td>${animal.animal_breed}</td>
+                        <td><img src = '${animal.photo}' width="80" height="60"></td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -205,6 +239,12 @@
             });
         }
     }
+
+    // Filter
+    $('#Filter').on('submit', function (e) {
+        e.preventDefault();
+        searchAnimals()
+    });
 
     // Initial fetch
     fetchAnimals();
