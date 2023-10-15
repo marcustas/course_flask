@@ -26,7 +26,7 @@ def health_check() -> tuple[str, int]:
 def index() -> Response:
     name = request.args.get('name')
     if name:
-        animals = Animal.query.filter_by(name=name).all()
+        animals = Animal.query.filter(Animal.name.contains(name)).all()
     else:
         animals = Animal.query.all()
     response = {'animals': []}
