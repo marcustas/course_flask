@@ -17,10 +17,23 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health_check():
+    return 'OK', 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
-    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+    name = request.args.get('name')
+    if name:
+        filtered_animals = Animal.query.filter(Animal.name.ilike(f'%{name}%')).all()
+    else:
+        filtered_animals = Animal.query.all()
+
+    animal_data = [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in filtered_animals]
+
+    return jsonify({"animals": animal_data})
+
 
 
 @app.route('/animal', methods=['POST'])
@@ -29,7 +42,11 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        age = data.age,
+        breed=data.breed,
+        animal_photo=data.animal_photo
+
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -51,6 +68,8 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.breed = data.breed
+    animal.animal_photo = data.animal_photo
     db.session.commit()
     return jsonify(
         {
