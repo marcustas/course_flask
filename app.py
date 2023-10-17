@@ -43,7 +43,7 @@ def add_animal() -> tuple[Response, int]:
         animal_type=data.animal_type,
         name=data.name,
         birth_date=data.birth_date,
-        age = data.age,
+        age=data.age,
         breed=data.breed,
         animal_photo=data.animal_photo
 
