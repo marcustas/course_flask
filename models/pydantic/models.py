@@ -6,6 +6,7 @@ class AnimalCreate(BaseModel):
     animal_type: str
     name: str
     birth_date: date
+    breed: str
 
 
 class AnimalResponse(BaseModel):
@@ -15,3 +16,4 @@ class AnimalResponse(BaseModel):
     animal_type: str
     name: str
     birth_date: date
+    breed: str
