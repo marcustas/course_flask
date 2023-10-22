@@ -17,6 +17,11 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health_check():
+    return '', 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
     animals = Animal.query.all()
@@ -82,6 +87,19 @@ def delete_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     db.session.delete(animal)
     db.session.commit()
     return jsonify({"message": "Animal deleted successfully!"})
+
+
+@app.route('/animals/filter', methods=['GET'])
+def filter_animals_by_name():
+    # Получаем параметр 'name' из запроса
+    filtered_name = request.args.get('name')
+
+    # Получаем всех животных из базы данных с совпадающим именем
+    animals = Animal.query.filter(Animal.name == filtered_name).all()
+
+    # Возвращаем результат в формате JSON
+    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+
 
 
 def initialize_app():

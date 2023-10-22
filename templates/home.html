@@ -33,10 +33,60 @@
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+                <div class="form-group">
+                    <label for="breed">Breed:</label>
+                    <input type="text" class="form-control" id="breed" placeholder="Animal breed" required>
+                </div>
+                <div class="form-group">
+                    <label for="photo">Photo:</label>
+                    <input type="text" class="form-control" id="photo" placeholder="Url photo" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
         </div>
     </div>
+
+    <head>
+    <title>Пошук тварин за іменем</title>
+    </head>
+        <h1>Пошук тварин за іменем</h1>
+        <form id="search-form">
+            <label for="name">Ім'я тварини:</label>
+            <input type="text" id="name" name="name" placeholder="Введіть ім'я тварини">
+            <button type="submit">Пошук</button>
+        </form>
+
+        <div id="results">
+
+    </div>
+
+<script>
+    const searchForm = document.getElementById("search-form");
+    const resultsDiv = document.getElementById("results");
+
+    searchForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+
+        const response = await fetch(`/animals?name=${name}`, {
+            method: "GET"
+        });
+
+        const data = await response.json();
+        resultsDiv.innerHTML = "";
+
+        if (data.animals) {
+            for (const animal of data.animals) {
+                const animalDiv = document.createElement("div");
+                animalDiv.textContent = `Тип: ${animal.animal_type}, Ім'я: ${animal.name}, Дата народження: ${animal.birth_date}`;
+                resultsDiv.appendChild(animalDiv);
+            }
+        } else {
+            resultsDiv.textContent = "Тварини не знайдено.";
+        }
+    });
+</script>
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
@@ -47,6 +97,8 @@
                 <th>Name</th>
                 <th>Birth Date</th>
                 <th>Actions</th>
+                <th>Breed</th>
+                <th>Photo</th>
             </tr>
         </thead>
         <tbody id="animalsList">
@@ -54,6 +106,7 @@
         </tbody>
     </table>
 </div>
+
 
 <!-- Edit animal modal -->
 <div class="modal" tabindex="-1" role="dialog" id="editAnimalModal">
@@ -80,6 +133,14 @@
                 <label for="editAnimalBirthDate">Birth Date:</label>
                 <input type="date" class="form-control" id="editAnimalBirthDate" required>
             </div>
+            <div class="form-group">
+                <label for="breed">Breed:</label>
+                <input type="text" class="form-control" id="breed" placeholder="Animal breed" required>
+            </div>
+            <div class="form-group">
+                <label for="photo">Photo:</label>
+                <input type="text" class="form-control" id="photo" placeholder="Url photo" required>
+            </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -100,6 +161,8 @@
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
+            $('#editBreed').val(data.animal.breed);
+            $('#editPhoto').val(data.animal.photo);
             $('#editAnimalModal').modal('show');
         });
     }
@@ -108,7 +171,9 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            birth_date: $('#editAnimalBirthDate').val(),
+            breeed: $('#editbreed').val(),
+            photo: $('#editphoto').val(),
         };
 
         const animalId = $('#editAnimalId').val();
@@ -137,6 +202,8 @@
                         <td>${animal.animal_type}</td>
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.breed}</td>
+                        <td>${animal.photo}</td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -153,7 +220,9 @@
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            birth_date: $('#birth_date').val(),
+            breed: $('#breed').val(),
+            photo: $('#photo').val()
         };
         $.ajax({
             url: '/animal',
