@@ -11,3 +11,4 @@ def init_db(app):
     migrate.init_app(app, db)
 
     return db
+
