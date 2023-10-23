@@ -33,6 +33,14 @@
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+                <div class="form-group">
+                    <label for="breed">Breed:</label>
+                    <input type="text" class="form-control" id="breed" placeholder="Breed" required>
+                </div>
+                <div class="form-group">
+                    <label for="photo">Animal Photo Url:</label>
+                    <input type="text" class="form-control" id="photo" placeholder="Image Url" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
         </div>
@@ -40,12 +48,22 @@
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
+    <form id="searchForm" class="mb-4">
+        <div class="form-group">
+            <label for="search_by_name">Search</label>
+            <input type="text" class="form-control" id="search_by_name" placeholder="search by name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Animal Type</th>
                 <th>Name</th>
                 <th>Birth Date</th>
+                <th>Age</th>
+                <th>Breed</th>
+                <th>Photo</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -80,6 +98,14 @@
                 <label for="editAnimalBirthDate">Birth Date:</label>
                 <input type="date" class="form-control" id="editAnimalBirthDate" required>
             </div>
+            <div class="form-group">
+                <label for="editBreed">Breed:</label>
+                <input type="text" class="form-control" id="editBreed" placeholder="Breed" required>
+            </div>
+            <div class="form-group">
+                <label for="editPhoto">Animal Photo Url:</label>
+                <input type="text" class="form-control" id="editPhoto" placeholder="Image Url" required>
+            </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -100,6 +126,8 @@
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
+            $('#editBreed').val(data.animal.breed);
+            $('#editPhoto').val(data.animal.photo);
             $('#editAnimalModal').modal('show');
         });
     }
@@ -108,7 +136,9 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            birth_date: $('#editAnimalBirthDate').val(),
+            breed: $('#editBreed').val(),
+            photo: $('#editPhoto').val(),
         };
 
         const animalId = $('#editAnimalId').val();
@@ -137,6 +167,9 @@
                         <td>${animal.animal_type}</td>
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.age}</td>
+                        <td>${animal.breed}</td>
+                        <td><img src="${animal.photo}"></td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -153,7 +186,10 @@
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            birth_date: $('#birth_date').val(),
+            age: $('#age').val(),
+            breed: $('#breed').val(),
+            photo: $('#photo').val(),
         };
         $.ajax({
             url: '/animal',

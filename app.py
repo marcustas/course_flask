@@ -24,7 +24,11 @@ def health():
 
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
+    search = request.args.get('search_by_name')
+    if search:
+        animals = Animal.query.filter(Animal.name.contains(search))
+    else:
+        animals = Animal.query.all()
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 
@@ -35,6 +39,7 @@ def add_animal() -> tuple[Response, int]:
         animal_type=data.animal_type,
         name=data.name,
         birth_date=data.birth_date,
+        breed=data.breed,
         photo=data.photo
     )
     db.session.add(new_animal)
@@ -57,6 +62,7 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    breed = data.breed
     animal.photo = data.photo
     db.session.commit()
     return jsonify(
