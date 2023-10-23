@@ -17,6 +17,11 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health():
+    return "Ok", 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
     animals = Animal.query.all()
@@ -29,7 +34,8 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        photo=data.photo
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -51,6 +57,7 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.photo = data.photo
     db.session.commit()
     return jsonify(
         {
