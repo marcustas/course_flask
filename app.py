@@ -17,20 +17,25 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health():
+    return "Ok", 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    animals = Animal.query.all()
+    search = request.args.get('search')
+    if search:
+        animals = Animal.query.filter(Animal.name.icontains(search))
+    else:
+        animals = Animal.query.all()
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 
 @app.route('/animal', methods=['POST'])
 def add_animal() -> tuple[Response, int]:
     data = AnimalCreate(**request.get_json())
-    new_animal = Animal(
-        animal_type=data.animal_type,
-        name=data.name,
-        birth_date=data.birth_date
-    )
+    new_animal = Animal(**data.__dict__)
     db.session.add(new_animal)
     db.session.commit()
     return jsonify(
@@ -47,10 +52,11 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal = Animal.query.get(pk)
     if not animal:
         return jsonify({"message": "Animal not found"}), 404
-
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.breed = data.breed
+    animal.photo = data.photo
     db.session.commit()
     return jsonify(
         {
