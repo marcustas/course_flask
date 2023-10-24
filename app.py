@@ -17,9 +17,18 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def healthcheck() -> tuple[str, int]:
+    return "200 OK", 200
+
+
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
+    name_search = request.args.get('name')
     animals = Animal.query.all()
+    if name_search:
+        animals = [animal for animal in animals if name_search.lower() in animal.name.lower()]
+
     return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
 
 
@@ -29,7 +38,10 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        breed=data.breed,
+        birth_date=data.birth_date,
+        photo=data.photo
+
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -50,7 +62,9 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
 
     animal.animal_type = data.animal_type
     animal.name = data.name
+    animal.breed = data.breed
     animal.birth_date = data.birth_date
+    animal.photo = data.photo
     db.session.commit()
     return jsonify(
         {

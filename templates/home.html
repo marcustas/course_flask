@@ -23,18 +23,41 @@
             <form id="addAnimalForm">
                 <div class="form-group">
                     <label for="animal_type">Animal Type:</label>
-                    <input type="text" class="form-control" id="animal_type" placeholder="Animal Type" required>
+                    <select class="form-control" id="animal_type" required>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="name">Animal Name:</label>
                     <input type="text" class="form-control" id="name" placeholder="Animal Name" required>
                 </div>
                 <div class="form-group">
+                    <label for="breed">Breed:</label>
+                    <select class="form-control" id="breed" required>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+                <div class="form-group">
+                    <label for="photo">Photo:</label>
+                    <input type="text" class="form-control" id="photo" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">Search Animals</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="searchName">Find by Name:</label>
+                <input type="text" class="form-control" id="findName" placeholder="Enter the name to find">
+            </div>
+            <button type="button" class="btn btn-primary" id="findButton">Search</button>
         </div>
     </div>
 
@@ -45,7 +68,10 @@
             <tr>
                 <th>Animal Type</th>
                 <th>Name</th>
+                <th>Breed</th>
                 <th>Birth Date</th>
+                <th>Age</th>
+                <th>Photo</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -70,15 +96,27 @@
             <input type="hidden" id="editAnimalId">
             <div class="form-group">
                 <label for="editAnimalType">Animal Type:</label>
-                <input type="text" class="form-control" id="editAnimalType" required>
+                <select class="form-control" id="editAnimalType" required>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="editAnimalName">Name:</label>
                 <input type="text" class="form-control" id="editAnimalName" required>
             </div>
             <div class="form-group">
+                <label for="editAnimalBreed">Breed:</label>
+                <select class="form-control" id="editAnimalBreed" required>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="editAnimalBirthDate">Birth Date:</label>
                 <input type="date" class="form-control" id="editAnimalBirthDate" required>
+            </div>
+            <div class="form-group">
+                <label for="editAnimalPhoto">Photo:</label>
+                <input type="text" class="form-control" id="editAnimalPhoto" required>
             </div>
         </form>
       </div>
@@ -91,6 +129,41 @@
 </div>
 
 <script>
+    // Script to dynamically assign breeds based on the animal type
+    const breedSelect = document.getElementById('breed');
+    const editBreedSelect = document.getElementById('editAnimalBreed');
+    const animalTypeSelect = document.getElementById('animal_type');
+    const editAnimalTypeSelect = document.getElementById('editAnimalType');
+
+    const breedOptions = {
+        Dog: ['Affenpinscher', 'Boxer', 'Bulldog', 'Chihuahua', 'Doberman', 'French bulldog', 'Mastiff', 'Spitz'],
+        Cat: ['Aegean', 'Balinese', 'Bengal', 'Burmese', 'Egyptian Mau', 'Himalayan', 'Munchkin', 'Persian', 'Sphynx']
+    };
+
+    function updateBreedOptions(selectElement, breedSelect) {
+        const selectedAnimalType = selectElement.value;
+        breedSelect.innerHTML = '';
+
+        breedOptions[selectedAnimalType].forEach(breed => {
+            const option = document.createElement('option');
+            option.value = breed;
+            option.textContent = breed;
+            breedSelect.appendChild(option);
+        });
+    }
+
+    // Event listeners
+    animalTypeSelect.addEventListener('change', () => updateBreedOptions(animalTypeSelect, breedSelect));
+    editAnimalTypeSelect.addEventListener('change', () => updateBreedOptions(editAnimalTypeSelect, editBreedSelect));
+
+    // Initialize breed options for both forms
+    updateBreedOptions(animalTypeSelect, breedSelect);
+    updateBreedOptions(editAnimalTypeSelect, editBreedSelect);
+</script>
+
+
+
+<script>
     // Update animal
     function updateAnimal(id) {
         // Fetch the current details of the animal to pre-populate the form.
@@ -99,7 +172,9 @@
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
+            $('#editAnimalBreed').val(data.animal.breed);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
+            $('#editAnimalPhoto').val(data.animal.photo);
             $('#editAnimalModal').modal('show');
         });
     }
@@ -108,7 +183,9 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            breed: $('#editAnimalBreed').val(),
+            birth_date: $('#editAnimalBirthDate').val(),
+            photo: $('#editAnimalPhoto').val()
         };
 
         const animalId = $('#editAnimalId').val();
@@ -136,7 +213,10 @@
                     <tr>
                         <td>${animal.animal_type}</td>
                         <td>${animal.name}</td>
+                        <td>${animal.breed}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.age}</td>
+                        <td><img src="${animal.photo}" alt="Animal Photo" style="max-width: 100px; max-height: 100px;"></td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -153,7 +233,9 @@
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            breed: $('#breed').val(),
+            birth_date: $('#birth_date').val(),
+            photo: $('#photo').val()
         };
         $.ajax({
             url: '/animal',
@@ -183,7 +265,42 @@
     // Initial fetch
     fetchAnimals();
 
-
 </script>
+
+<script>
+$('#findButton').click(function() {
+    const findName = $('#findName').val();
+
+    fetch(`/animals?name=${findName}`)
+        .then(response => response.json())
+        .then(data => {
+            displayAnimals(data);
+        })
+        .catch(error => {
+            console.error('Error during search:', error);
+        });
+});
+
+function displayAnimals(data) {
+    $('#animalsList').empty();
+    data.animals.forEach(animal => {
+        $('#animalsList').append(`
+            <tr>
+                <td>${animal.animal_type}</td>
+                <td>${animal.name}</td>
+                <td>${animal.breed}</td>
+                <td>${animal.birth_date}</td>
+                <td>${animal.age}</td>
+                <td><img src="${animal.photo}" alt="Animal Photo" style="max-width: 100px; max-height: 100px;"></td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
+                </td>
+            </tr>
+        `);
+    });
+}
+</script>
+
 </body>
 </html>
