@@ -158,7 +158,8 @@
 
     // Fetch all animals and display them
     function fetchAnimals() {
-        $.getJSON('/animals', function(data) {
+        const search = $('#search_by_name').val()
+        $.getJSON('/animals', {search}, function (data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
                 console.log(animal)
@@ -201,6 +202,11 @@
                 $('#addAnimalForm')[0].reset();
             }
         });
+    });
+
+    $('#searchForm').on('submit', function (e) {
+        e.preventDefault();
+        fetchAnimals()
     });
 
     // Delete animal

@@ -24,7 +24,7 @@ def health():
 
 @app.route('/animals', methods=['GET'])
 def index() -> Response:
-    search = request.args.get('search_by_name')
+    search = request.args.get('search')
     if search:
         animals = Animal.query.filter(Animal.name.contains(search))
     else:
