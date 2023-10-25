@@ -26,6 +26,10 @@
                     <input type="text" class="form-control" id="animal_type" placeholder="Animal Type" required>
                 </div>
                 <div class="form-group">
+                    <label for="animal_breed">Animal Breed:</label>
+                    <input type="text" class="form-control" id="animal_breed" placeholder="Animal Breed" required>
+                </div>
+                <div class="form-group">
                     <label for="name">Animal Name:</label>
                     <input type="text" class="form-control" id="name" placeholder="Animal Name" required>
                 </div>
@@ -33,10 +37,20 @@
                     <label for="birth_date">Birth Date:</label>
                     <input type="date" class="form-control" id="birth_date" required>
                 </div>
+                <div class="form-group">
+                    <label for="photo">Photo:</label>
+                    <input type="text" class="form-control" id="photo" placeholder="Photo URL" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Animal</button>
             </form>
         </div>
     </div>
+
+    <h4 class="mt-4">Search:</h4>
+    <div class="form-group">
+                    <input type="text" class="form-control" id="Search_field" placeholder="Search prompt" required>
+                </div>
+    <button type="button" class="btn btn-outline-success" onclick="fetchAnimals(document.getElementById('Search_field').value)">Search</button>
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
@@ -44,8 +58,11 @@
         <thead>
             <tr>
                 <th>Animal Type</th>
+                <th>Animal Breed</th>
                 <th>Name</th>
                 <th>Birth Date</th>
+                <th>Age</th>
+                <th>Photo</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -73,12 +90,20 @@
                 <input type="text" class="form-control" id="editAnimalType" required>
             </div>
             <div class="form-group">
+                <label for="editAnimalBreed">Animal Breed:</label>
+                <input type="text" class="form-control" id="editAnimalBreed" required>
+            </div>
+            <div class="form-group">
                 <label for="editAnimalName">Name:</label>
                 <input type="text" class="form-control" id="editAnimalName" required>
             </div>
             <div class="form-group">
                 <label for="editAnimalBirthDate">Birth Date:</label>
                 <input type="date" class="form-control" id="editAnimalBirthDate" required>
+            </div>
+            <div class="form-group">
+                <label for="editAnimalPhoto">Photo:</label>
+                <input type="text" class="form-control" id="editAnimalPhoto" required>
             </div>
         </form>
       </div>
@@ -99,6 +124,8 @@
             $('#editAnimalId').val(data.animal.id);
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
+            $('#editAnimalBreed').val(data.animal.animal_breed);
+            $('#editAnimalPhoto').val(data.animal.photo);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
             $('#editAnimalModal').modal('show');
         });
@@ -108,6 +135,8 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
+            animal_breed: $('#editAnimalBreed').val(),
+            photo: $('#editAnimalPhoto').val(),
             birth_date: $('#editAnimalBirthDate').val()
         };
 
@@ -127,16 +156,19 @@
 
 
     // Fetch all animals and display them
-    function fetchAnimals() {
-        $.getJSON('/animals', function(data) {
+    function fetchAnimals(search) {
+        var url = search === undefined || search == '' ? `/animals` : `/animals/${search}`
+        $.getJSON(url, function(data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
-                console.log(animal)
                 $('#animalsList').append(`
                     <tr>
                         <td>${animal.animal_type}</td>
+                        <td>${animal.animal_breed}</td>
                         <td>${animal.name}</td>
                         <td>${animal.birth_date}</td>
+                        <td>${animal.age}</td>
+                        <td>${animal.photo}</td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
@@ -153,7 +185,9 @@
         const newAnimal = {
             animal_type: $('#animal_type').val(),
             name: $('#name').val(),
-            birth_date: $('#birth_date').val()
+            birth_date: $('#birth_date').val(),
+            animal_breed: $('#animal_breed').val(),
+            photo: $('#photo').val()
         };
         $.ajax({
             url: '/animal',
@@ -180,8 +214,10 @@
         }
     }
 
-    // Initial fetch
-    fetchAnimals();
+
+
+        // Initial fetch
+        fetchAnimals();
 
 
 </script>

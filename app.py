@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Response, render_template
-
+from datetime import date
 from models.pydantic.models import AnimalCreate, AnimalResponse
 from typing import Union
 from settings import settings
@@ -17,10 +17,30 @@ def home() -> str:
     return render_template('home.html')
 
 
+@app.route('/health')
+def health() -> str:
+    return jsonify(
+        "Server is up!"
+    ), 200
+
+
 @app.route('/animals', methods=['GET'])
-def index() -> Response:
-    animals = Animal.query.all()
-    return jsonify({"animals": [AnimalResponse.model_validate(animal).model_dump(mode='json') for animal in animals]})
+@app.route('/animals/<search_field>', methods=['GET'])
+def index(search_field=None) -> Response:
+    if search_field is None:
+        animals = Animal.query.all()
+    else:
+        animals = Animal.query.filter(Animal.name.ilike(f'%{search_field}%')).all()
+    # animals = Animal.query.all()
+    animals_list = []
+    for animal in animals:
+        animal = AnimalResponse.model_validate(animal)
+        animal_json = animal.model_dump(mode='json')
+        animal_json['age'] = animal.age
+        animals_list.append(animal_json)
+
+    response = jsonify({"animals": animals_list})
+    return response
 
 
 @app.route('/animal', methods=['POST'])
@@ -29,7 +49,9 @@ def add_animal() -> tuple[Response, int]:
     new_animal = Animal(
         animal_type=data.animal_type,
         name=data.name,
-        birth_date=data.birth_date
+        birth_date=data.birth_date,
+        animal_breed=data.animal_breed,
+        photo=data.photo
     )
     db.session.add(new_animal)
     db.session.commit()
@@ -51,6 +73,9 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.animal_breed = data.animal_breed
+    animal.photo = data.photo
+
     db.session.commit()
     return jsonify(
         {
@@ -65,7 +90,6 @@ def retrieve_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal = Animal.query.get(pk)
     if not animal:
         return jsonify({"message": "Animal not found"}), 404
-
     return jsonify(
         {
             "animal": AnimalResponse.model_validate(animal).model_dump(mode='json'),
