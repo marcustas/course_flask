@@ -48,9 +48,9 @@
 
     <h4 class="mt-4">Search:</h4>
     <div class="form-group">
-                    <input type="text" class="form-control" id="Search" placeholder="Search prompt" required>
+                    <input type="text" class="form-control" id="Search_field" placeholder="Search prompt" required>
                 </div>
-    <button type="button" class="btn btn-outline-success" onclick="">Search</button>
+    <button type="button" class="btn btn-outline-success" onclick="fetchAnimals(document.getElementById('Search_field').value)">Search</button>
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
@@ -156,8 +156,9 @@
 
 
     // Fetch all animals and display them
-    function fetchAnimals() {
-        $.getJSON('/animals', function(data) {
+    function fetchAnimals(search) {
+        var url = search === undefined || search == '' ? `/animals` : `/animals/${search}`
+        $.getJSON(url, function(data) {
             $('#animalsList').empty();
             data.animals.forEach(animal => {
                 $('#animalsList').append(`
@@ -213,8 +214,10 @@
         }
     }
 
-    // Initial fetch
-    fetchAnimals();
+
+
+        // Initial fetch
+        fetchAnimals();
 
 
 </script>

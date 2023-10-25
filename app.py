@@ -16,6 +16,7 @@ db = init_db(app)
 def home() -> str:
     return render_template('home.html')
 
+
 @app.route('/health')
 def health() -> str:
     return jsonify(
@@ -24,11 +25,16 @@ def health() -> str:
 
 
 @app.route('/animals', methods=['GET'])
-def index() -> Response:
-    animals = Animal.query.all()
-    animals_list =[]
+@app.route('/animals/<search_field>', methods=['GET'])
+def index(search_field=None) -> Response:
+    if search_field is None:
+        animals = Animal.query.all()
+    else:
+        animals = Animal.query.filter(Animal.name.ilike(f'%{search_field}%')).all()
+    # animals = Animal.query.all()
+    animals_list = []
     for animal in animals:
-        animal= AnimalResponse.model_validate(animal)
+        animal = AnimalResponse.model_validate(animal)
         animal_json = animal.model_dump(mode='json')
         animal_json['age'] = animal.age
         animals_list.append(animal_json)
@@ -69,7 +75,6 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.birth_date = data.birth_date
     animal.animal_breed = data.animal_breed
     animal.photo = data.photo
-
 
     db.session.commit()
     return jsonify(

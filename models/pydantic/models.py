@@ -19,3 +19,9 @@ class AnimalResponse(BaseModel):
     name: str
     birth_date: date
     photo: str
+
+    @property
+    def age(self) -> int:
+        today = date.today()
+        age = today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+        return age
