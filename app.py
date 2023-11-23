@@ -46,6 +46,7 @@ def add_animal() -> tuple[Response, int]:
 @app.route('/animal/<int:pk>', methods=['PUT'])
 def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     data = AnimalCreate(**request.get_json())
+    print(data)
     animal = Animal.query.get(pk)
     if not animal:
         return jsonify({"message": "Animal not found"}), 404
@@ -53,6 +54,8 @@ def update_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     animal.animal_type = data.animal_type
     animal.name = data.name
     animal.birth_date = data.birth_date
+    animal.breed = data.breed
+    animal.photo = data.photo
     db.session.commit()
     return jsonify(
         {
@@ -86,9 +89,9 @@ def delete_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     return jsonify({"message": "Animal deleted successfully!"})
 
 
-@app.route('/health')
+@app.route('/health', methods=['GET'])
 def health_animal():
-    return
+    return '', 200
 
 
 def initialize_app():
