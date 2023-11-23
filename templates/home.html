@@ -45,6 +45,17 @@
             </form>
         </div>
     </div>
+    <!-- Search animal by name -->
+    <div class="card mt-4">
+        <div class="card-header">Search Animal</div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="searchName">Search by Name:</label>
+                <input type="text" class="form-control" id="searchName" placeholder="Enter Name">
+            </div>
+            <button class="btn btn-primary" onclick="filterAnimals()">Search</button>
+        </div>
+    </div>
 
     <!-- List of animals in a table -->
     <h4 class="mt-4">List of animals:</h4>
@@ -65,6 +76,7 @@
         </tbody>
     </table>
 </div>
+
 
 <!-- Edit animal modal -->
 <div class="modal" tabindex="-1" role="dialog" id="editAnimalModal">
@@ -124,6 +136,35 @@
             $('#editAnimalBreed').val(data.animal.breed);
             $('#editAnimalPhoto').val(data.animal.photo);
             $('#editAnimalModal').modal('show');
+        });
+    }
+
+    function filterAnimals() {
+    const searchName = $('#searchName').val().toLowerCase();
+
+    $.getJSON('/animals', function(data) {
+        $('#animalsList').empty();
+        data.animals.forEach(animal => {
+
+            if (animal.name.toLowerCase().includes(searchName)) {
+                const age = calculateAge(animal.birth_date);
+
+                $('#animalsList').append(`
+                    <tr>
+                        <td>${animal.animal_type}</td>
+                        <td>${animal.name}</td>
+                        <td>${animal.birth_date}</td>
+                        <td>${age}</td>
+                        <td>${animal.breed}</td>
+                        <td><img src='${animal.photo}'></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="updateAnimal(${animal.id})">Update</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAnimal(${animal.id})">Delete</button>
+                        </td>
+                    </tr>
+                    `);
+                }
+            });
         });
     }
 
