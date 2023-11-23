@@ -110,6 +110,8 @@
             $('#editAnimalType').val(data.animal.animal_type);
             $('#editAnimalName').val(data.animal.name);
             $('#editAnimalBirthDate').val(data.animal.birth_date);
+            $('#editAnimalBreed').val(data.animal.breed);
+            $('#editAnimalPhoto').val(data.animal.photo);
             $('#editAnimalModal').modal('show');
         });
     }
@@ -118,7 +120,10 @@
         const updatedAnimal = {
             animal_type: $('#editAnimalType').val(),
             name: $('#editAnimalName').val(),
-            birth_date: $('#editAnimalBirthDate').val()
+            birth_date: $('#editAnimalBirthDate').val(),
+            breed: $('#editAminalBreed').val(),
+            photo: $('#editAminalPhoto').val(),
+
         };
 
         const animalId = $('#editAnimalId').val();
