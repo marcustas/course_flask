@@ -84,6 +84,11 @@ def delete_animal(pk: int) -> Union[Response, tuple[Response, int]]:
     return jsonify({"message": "Animal deleted successfully!"})
 
 
+@app.route('/health')
+def health_animal():
+    return
+
+
 def initialize_app():
     with app.app_context():
         db.create_all()
